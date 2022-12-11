@@ -10,12 +10,14 @@ const port = 4000
 // Remove deprecation warning from console
 mongoose.set('strictQuery', true);
 
-let pool;
+/** @type {mysql.Pool} */
+var pool;
 
 mysql.createPool({
     connectionLimit: 3,
     user: "umcx0jbxxarkjxfd",
-    host: "mysql://umcx0jbxxarkjxfd:s0yIJ9AGFBKgKNjpUWJi@bn85c5yhtp2agdsayi1q-mysql.services.clever-cloud.com:3306/bn85c5yhtp2agdsayi1q",
+    host: "bn85c5yhtp2agdsayi1q-mysql.services.clever-cloud.com",
+    port: 3306,
     password: "s0yIJ9AGFBKgKNjpUWJi",
     database: 'bn85c5yhtp2agdsayi1q'
 }).then(p =>
