@@ -3,6 +3,7 @@ const bodyParser = require('body-parser')
 const mongoose = require('mongoose');
 const cors = require('cors');
 const mysql = require('promise-mysql');
+const { check, validationResult } = require('express-validator');
 
 const app = express()
 const port = 4000
@@ -68,31 +69,97 @@ app.listen(port, () =>
     console.log(`Example app listening on port ${port}`)
 })
 
+// Home page
 app.get('/', (req, res) =>
 {
     res.render("home", { errors: undefined })
 })
 
+// Employees page
 app.get('/employees', (req, res) =>
 {
     pool.query("select * from employee").then((d) =>
     {
         res.render("employees", { employees: d })
+    }).catch((e) =>
+    {
+        res.redirect("/")
     })
 });
 
-app.get('/employees/edit/:eid', (req, res) =>
-{
-    pool.query("SELECT * FROM employee e WHERE e.eid = '" + req.params.eid + "'").then((d) =>
+// Edit page
+app.get('/employees/edit/:eid',
+    (req, res) =>
     {
-        res.render("employee", { e: d[0] })
+        pool.query("SELECT * FROM employee e WHERE e.eid = '" + req.params.eid + "'").then((d) =>
+        {
+            console.log(d);
+            res.render("employee", { e: d[0], errors: undefined })
+        }).catch((e) =>
+        {
+            res.redirect("/employees")
+        })
+    });
+
+// Edit endpoint
+app.post('/employees/edit/:eid',
+    [
+        check("name").isLength({ min: 5 }).withMessage("Name must be 5 characters long")
+    ],
+    [
+        check("role").isIn(["Manager", "Employee"]).withMessage("Please select valid Role")
+    ],
+    [
+        check("salary").isFloat({ gt: 0 }).withMessage("Salary must be greater than 0")
+    ],
+    (req, res) =>
+    {
+        const errors = validationResult(req)
+
+        console.log(req.body);
+
+        let data = {};
+        data.eid = req.params.eid;
+        data.ename = req.body.name;
+        data.role = req.body.role;
+        data.salary = req.body.salary;
+
+        if (!errors.isEmpty())
+        {
+            res.render("employee", { e: data, errors: errors.errors })
+        }
+        else
+        {
+            pool.query(`UPDATE employee SET ename='${req.body.name}', role='${req.body.role}', salary='${req.body.salary}' WHERE eid = '${req.params.eid}'`).then((d) =>
+            {
+                res.redirect("/employees")
+            }).catch((e) =>
+            {
+                res.redirect("/employees")
+            })
+        }
+    });
+
+// Deptartments page
+app.get('/depts', (req, res) =>
+{
+    pool.query("SELECT dept.did,dept.dname,loc.county,dept.budget FROM dept JOIN location AS loc ON loc.lid = dept.lid").then((d) =>
+    {
+        res.render("departments", { departments: d })
+    }).catch((e) =>
+    {
+
     })
 });
 
-app.post('/employees/edit/:eid', (req, res) =>
+// Departments page
+app.get('/depts/delete/:did', (req, res) =>
 {
-    pool.query(`UPDATE employee SET eid='${req.body.id}', ename='${req.body.name}', role='${req.body.role}', salary='${req.body.salary}' WHERE eid = '${req.params.eid}'`).then((d) =>
+    pool.query(`DELETE FROM dept WHERE did = '${req.params.did}';`).then((d) =>
     {
-        res.redirect("/employees")
+        console.log(d);
+    }).catch(() =>
+    {
+        res.status(400).send('<div style="text-align:center;"><h1>404</h1> <h1>Page not found</h1></div>');
     })
 });

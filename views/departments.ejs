@@ -23,39 +23,37 @@
 
 <body>
     <div class="Container">
-        <h1>Employees</h1>
+        <h1>Departments</h1>
 
         <br />
 
         <table>
             <tr>
-                <th>EID</th>
-                <th>ID</th>
+                <th>DID</th>
                 <th>Name</th>
-                <th>Salary</th>
-                <th>Update</th>
+                <th>Budget</th>
+                <th>Location</th>
+                <th>Delete</th>
             </tr>
-
-            <% for(let e of employees) {%>
+            <% for(let d of departments) {%>
             <tr>
                 <td>
-                    <%= e.eid %>
+                    <%= d.did %>
                 </td>
                 <td>
-                    <%= e.ename %>
+                    <%= d.dname %>
                 </td>
                 <td>
-                    <%= e.role %>
+                    <%= d.budget %>
                 </td>
                 <td>
-                    <%= e.salary %>
+                    <%= d.county %>
                 </td>
                 <td>
-                    <a href="/employees/edit/<%= e.eid %>">Update</a>
+                    <a href="/depts/delete/<%= d.did %>">Delete</a>
                 </td>
             </tr>
             <% }%>
-
         </table>
         <br>
         <a href="/">Home</a>
