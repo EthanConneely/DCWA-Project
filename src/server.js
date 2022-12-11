@@ -148,7 +148,7 @@ app.get('/depts', (req, res) =>
         res.render("departments", { departments: d })
     }).catch((e) =>
     {
-
+        res.redirect("/");
     })
 });
 
@@ -160,6 +160,11 @@ app.get('/depts/delete/:did', (req, res) =>
         console.log(d);
     }).catch(() =>
     {
-        res.status(400).send('<div style="text-align:center;"><h1>404</h1> <h1>Page not found</h1></div>');
+        res.status(400).send(
+            `<div style="text-align:center;">
+                <h1>Error Message</h1>
+                <h2>${req.params.did} has Employees and connot be deleted</h2>
+                <a href="/depts">Home</a>
+            </div>`)
     })
 });
