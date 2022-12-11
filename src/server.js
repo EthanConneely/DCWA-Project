@@ -73,8 +73,12 @@ app.get('/', (req, res) =>
     res.render("home", { errors: undefined })
 })
 
-app.get('/employees', async (req, res) =>
+app.get('/employees', (req, res) =>
 {
-    let books = await EmployeeModel.find({})
-    res.json(books)
+    pool.query("select * from employee").then((d) =>
+    {
+        res.render("employees", { employees: d })
+    })
+});
+
 });
