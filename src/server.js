@@ -57,6 +57,7 @@ let employeesDB = db.useDb("employeesDB")
 
 // create a book schema
 const employeeSchema = new mongoose.Schema({
+    _id: String,
     phone: String,
     email: String,
 });
@@ -99,7 +100,8 @@ app.get('/employees/edit/:eid',
         {
             res.redirect("/employees")
         })
-    });
+    }
+);
 
 // Edit endpoint
 app.post('/employees/edit/:eid',
@@ -138,7 +140,8 @@ app.post('/employees/edit/:eid',
                 res.redirect("/employees")
             })
         }
-    });
+    }
+);
 
 // Deptartments page
 app.get('/depts', (req, res) =>
@@ -167,4 +170,12 @@ app.get('/depts/delete/:did', (req, res) =>
                 <a href="/depts">Home</a>
             </div>`)
     })
+});
+
+// Employees (Mongodb) page
+app.get('/employeesMongoDB', async (req, res) =>
+{
+    let result = await EmployeeModel.find({})
+    console.log(result);
+    res.render("Mongodb/employees", { employees: result });
 });
