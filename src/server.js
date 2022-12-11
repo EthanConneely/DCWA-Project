@@ -81,4 +81,10 @@ app.get('/employees', (req, res) =>
     })
 });
 
+app.get('/employees/edit/:eid', (req, res) =>
+{
+    pool.query("SELECT * FROM employee e WHERE e.eid = '" + req.params.eid + "'").then((d) =>
+    {
+        res.render("employee", { e: d[0] })
+    })
 });
