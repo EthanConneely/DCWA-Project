@@ -91,10 +91,8 @@ app.get('/employees/edit/:eid', (req, res) =>
 
 app.post('/employees/edit/:eid', (req, res) =>
 {
-    console.log(req.body);
-
     pool.query(`UPDATE employee SET eid='${req.body.id}', ename='${req.body.name}', role='${req.body.role}', salary='${req.body.salary}' WHERE eid = '${req.params.eid}'`).then((d) =>
     {
-        res.redirect("/")
+        res.redirect("/employees")
     })
 });
