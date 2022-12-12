@@ -94,7 +94,6 @@ app.get('/employees/edit/:eid',
     {
         pool.query("SELECT * FROM employee e WHERE e.eid = '" + req.params.eid + "'").then((d) =>
         {
-            console.log(d);
             res.render("employee", { e: d[0], errors: undefined })
         }).catch((e) =>
         {
@@ -117,8 +116,6 @@ app.post('/employees/edit/:eid',
     (req, res) =>
     {
         const errors = validationResult(req)
-
-        console.log(req.body);
 
         let data = {};
         data.eid = req.params.eid;
@@ -160,7 +157,7 @@ app.get('/depts/delete/:did', (req, res) =>
 {
     pool.query(`DELETE FROM dept WHERE did = '${req.params.did}';`).then((d) =>
     {
-        console.log(d);
+        res.redirect("/depts")
     }).catch(() =>
     {
         res.status(400).send(
@@ -179,3 +176,71 @@ app.get('/employeesMongoDB', async (req, res) =>
     console.log(result);
     res.render("Mongodb/employees", { employees: result });
 });
+
+// Add Employee (Mongodb) page
+app.get('/employeesMongoDB/add', async (req, res) =>
+{
+    res.render("Mongodb/addEmployee", { errors: undefined });
+});
+
+// Edit endpoint
+app.post('/employeesMongoDB/add',
+    [
+        check("_id").isLength({ eq: 4 }).withMessage("Name must be 5 characters long")
+    ],
+    [
+        check("phone").isLength({ gt: 5 }).withMessage("Phone number must be > 5")
+    ],
+    [
+        check("email").isEmail().withMessage("Email not correctly formated")
+    ],
+    async (req, res) =>
+    {
+        const errors = validationResult(req)
+
+        if (!errors.isEmpty())
+        {
+            res.render("Mongodb/addEmployee", { errors: errors.errors })
+            return;
+        }
+
+        try
+        {
+            let data = {};
+            data._id = req.body._id;
+            data.phone = req.body.phone;
+            data.email = req.body.email;
+
+            await EmployeeModel.insertMany([data])
+        }
+        catch (error)
+        {
+            res.status(400).send(
+                `<div style="text-align:center;">
+                    <h1>Error Message</h1>
+                    <h2>Error: ${req.body._id} already exists in MongoDB</h2>
+                    <a href="/employeesMongoDB">Home</a>
+                </div>`
+            );
+
+            return;
+        }
+
+        let sqlEmployees = await pool.query(`SELECT * FROM employee WHERE eid = '${req.body._id}'`)
+
+        if (sqlEmployees.length == 0)
+        {
+            res.status(400).send(
+                `<div style="text-align:center;">
+                    <h1>Error Message</h1>
+                    <h2>Error: ${req.body._id} doesnt exist in mysqldb</h2>
+                    <a href="/employeesMongoDB">Home</a>
+                </div>`
+            );
+        }
+
+        console.log("test", sqlEmployees);
+
+        res.redirect("/employeesMongoDB")
+    }
+);
